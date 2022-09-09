@@ -1,0 +1,103 @@
+syntax = "proto2";
+
+package nio.ad.messages;
+// message FrameDescriptor {
+//     repeated int32 cids             = 1;
+//     repeated float scores           = 2;
+//     repeated int32 sub_cids         = 3;
+//     repeated float sub_scores       = 4;
+//     repeated float embeddings       = 5;
+// }
+
+// message Object2D {
+//     optional int32 cid              = 1;            // category_id
+//     optional float score            = 2;
+//     optional int32 sub_cid          = 3;
+//     optional float sub_score        = 4;
+//     repeated float box              = 5;            // (x1,y1,x2,y2), raw image
+//     optional float theta            = 6;
+//     repeated float keypoints        = 7;            // [x,y,x,y,...]
+//     repeated float embeddings       = 8;
+// }
+
+// message Object3D {
+//     optional int32 cid               = 1;            // category_id
+//     optional float score             = 2;
+//     optional int32 sub_cid           = 3;
+//     optional float sub_score         = 4;
+//     optional float cx                = 5;
+//     optional float cy                = 6;
+//     optional float cz                = 7;
+//     optional float width             = 8;
+//     optional float height            = 9;
+//     optional float length            = 10;
+//     optional float theta             = 11;
+//     repeated float keypoints         = 12;           // [x,y,z,x,y,z,...]
+//     repeated float embeddings        = 13;
+// }
+
+// message LaneInfo {
+//     message Lane {
+//         optional int32 cid          = 1;            // category_id
+//         optional float score        = 2;
+//         optional int32 sub_cid      = 3;
+//         optional float sub_score    = 4;
+//         repeated float points       = 5;            // [x,y,x,y,...]
+//         repeated float coefs        = 6;            // reserve
+//     }
+//     optional int32 dims             = 1;            // lane2d=2, lane3d=3
+//     repeated Lane lanes             = 2;
+// }
+
+
+message LaneInfo {
+    message Lane {
+        //cid 主类别 0 车道线 1 停止线 2 路沿 
+        optional int32 cid          = 1;            // category_id
+        // 车道线得分
+        optional float score        = 2;
+        //sub_cid 0-20 车道线线性属性 21-30 模糊属性  31-40 横向车道线属性 31 减速让行 32 停车让行 
+        optional int32 sub_cid      = 3;
+        // 子类型得分，暂时不考虑
+        optional float sub_score    = 4;
+        //每条车道行点集
+        repeated float points       = 5;            // [x,y,x,y,...]
+        //每条车道行拟合系数
+        repeated float coefs        = 6;            // reserve 4ge 0
+    }
+    // 2d 车道线， dims目前默认给 = 2
+    optional int32 dims             = 1;            // lane2d=2, lane3d=3
+    //一张图多条车道线
+    repeated Lane lanes             = 2;
+}
+
+
+
+// message SegmentInfo {
+//     optional string data_format     = 1;
+//     optional bytes  data            = 2;           // png data
+// }
+
+// SENSOR_CAMERA_FW = 0, SENSOR_CAMERA_FN = 1, SENSOR_CAMERA_RN = 2,
+// SENSOR_CAMERA_FL = 3, SENSOR_CAMERA_FR = 4, SENSOR_CAMERA_RR = 5,
+// SENSOR_CAMERA_RL = 6, SENSOR_LIDAR_FRONT = 11
+message CdmModelResult {
+    // optional int32  sensor_id                   = 1;
+    // optional uint64 sensor_ts                   = 2;            // camera: exposure mcu_time, lidar: center-pointcloud sampleing ts
+    // optional uint64 cooking_ts                  = 3;            // record the starting time of NN (ms)
+    // optional string model_name                  = 4;            // ${name}:${version}
+    // optional int32 im_width                     = 5;
+    // optional int32 im_height                    = 6;
+    // optional FrameDescriptor frame_descriptor   = 7;
+    // repeated Object2D object_2d                 = 8;
+    // repeated Object3D object_3d                 = 9;
+    optional LaneInfo lane_info                 = 10;
+    // optional SegmentInfo segment_info           = 11;
+    // map<string, bytes> extend_info              = 12;
+    // map<string, bytes> debug_info               = 13;
+
+    // optional uint64 publish_ptp_ts              = 536870907;     // publish ptp timestamp, uint in nanosec
+    // optional string publisher_id                = 536870909;     // uuid of the publisher
+    // optional uint64 counter                     = 536870910;     // message counter
+    // optional uint64 publish_ts                  = 536870911;     // publish utc timestamp; unit : nanosecond
+}
